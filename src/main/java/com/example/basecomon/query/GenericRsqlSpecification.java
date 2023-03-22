@@ -107,21 +107,15 @@ public class GenericRsqlSpecification<T> implements Specification<T> {
                 .replace("%", HIBERNATE_ESCAPE_CHAR + "%")
                 .replace('*', '%');
     }
-    private List<Object> castArguments(final Root<T> root) {
+    private List<Object> castArguments(Path<?> propertyExpression) {
+        Class<?> type = propertyExpression.getJavaType();
 
-        Class<? extends Object> type = root.get(property).getJavaType();
-
-        List<Object> args = arguments.stream().map(arg -> {
-            if (type.equals(Integer.class)) {
-                return Integer.parseInt(arg);
-            } else if (type.equals(Long.class)) {
-                return Long.parseLong(arg);
-            } else {
-                return arg;
-            }
+        return arguments.stream().map(arg -> {
+            if (type.equals(Integer.class)) return Integer.parseInt(arg);
+            else if (type.equals(Long.class)) return Long.parseLong(arg);
+            else if (type.equals(Byte.class)) return Byte.parseByte(arg);
+            else return arg;
         }).collect(Collectors.toList());
-
-        return args;
     }
 
     // standard constructor, getter, setter
